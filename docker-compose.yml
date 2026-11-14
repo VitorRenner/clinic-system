@@ -1,0 +1,60 @@
+# Sobe o front (nginx) + PostgreSQL e aplica as migrações do Alembic.
+# Uso:
+#   cp .env.example .env      (ajuste as senhas)
+#   docker compose up -d --build
+# Front: http://localhost:8080   |   Banco: localhost:5432
+
+services:
+  web:
+    build: .
+    container_name: odonto-web
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16-alpine
+    container_name: odonto-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-odonto}
+      POSTGRES_USER: ${POSTGRES_USER:-odonto}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-odonto} -d ${POSTGRES_DB:-odonto}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  migrate:
+    image: python:3.12-slim
+    container_name: odonto-migrate
+    working_dir: /database
+    volumes:
+      - ./database:/database:ro
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-odonto}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-odonto}
+    command: sh -c "pip install -q -r requirements.txt && alembic upgrade head"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # api:                      # back-end Java (Spring Boot) — futuro
+  #   build: ../clinic-api
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-odonto}
+  #     SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-odonto}
+  #     SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+volumes:
+  pgdata:

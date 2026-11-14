@@ -1,4 +1,68 @@
-node_modules
-dist
-.idea
+# ---------- Node / Vite ----------
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.vite/
+
+# ---------- IDE / SO ----------
+.idea/workspace.xml
+.idea/shelf/
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+.vscode/
 .DS_Store
+Thumbs.db
+
+# ---------- Variáveis de ambiente / segredos ----------
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+secrets/
+credentials*.json
+
+# ---------- Banco de dados (dados sensíveis) ----------
+# arquivos de banco local
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+# dumps e backups (podem conter CPF, telefone, e-mail de pacientes)
+*.sql.gz
+*.dump
+*.bak
+*.backup
+dump*.sql
+backup*.sql
+backups/
+pgdata/
+postgres-data/
+mysql-data/
+# backups exportados pelo sistema (Configurações > Exportar backup)
+backup-odonto-*.json
+# exportações de agendamentos com dados de pacientes
+agendamentos-*.csv
+# config local do Spring (back-end Java)
+application-local.properties
+application-local.yml
+application-prod.properties
+application-prod.yml
+
+# ---------- Python (Alembic) ----------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
